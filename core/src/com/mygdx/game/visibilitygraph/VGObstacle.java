@@ -28,7 +28,7 @@ public class VGObstacle {
         }
 
         this.edges = new ArrayList<>();
-        VGVertex prevVertex = this.vertices.getLast();
+        VGVertex prevVertex = this.vertices.get(vertices.size() - 1);
         for (VGVertex curVertex : this.vertices) {
             edges.add(new VGEdge(prevVertex, curVertex, true));
         }
@@ -85,101 +85,35 @@ public class VGObstacle {
              *   plus the growth value times the normalized normal.
              * */
 
-            /* Solving for the point of intersection
-             *
-             * For some constants d0x, d0y, d1x, d1y
-             *                    n0x, n0y, n1x, n1y
-             *                    u0x, u0y, u1x, u1y:
-             *
-             * Let d0 = <d0x, d0y>, d1 = <d1x, d1y> be the direction vectors
-             *   for edges 0 and 1 respectively.
-             * Let n0 = <n0x, n0y>, n1 = <n1x, n1y> be the normal vectors
-             *   touching the line corresponding to each edge.
-             * Let u0 = <u0x, u0y>, u1 = <u1x, u1y> be the unit normal
-             *   vectors for each edge.
-             *
-             * We can set up the following equation:
-             *
-             *   d0 + n0 + s * u0 = d1 + n1 + t * u1   for some scalars s, t
-             *
-             * With some work, this equation can be written as the following
-             * system of equations:
-             *
-             *   s(u0x) - t(u1x) = d0x + n0x - d1x - n1x
-             *   s(u0y) - t(u1y) = d0y + n0y - d1y - n1y
-             *
-             * From which we can build the following augmented matrix:
-             *
-             *     s      t           Constants
-             *  [ u0x   -u1x  |  d0x + n0x - d1x - n1x ]
-             *  [ u0y   -u1y  |  d0y + n0y - d1y - n1y ]
-             *
-             * From here we can solve the system by reducing the matrix to
-             * reduced row echelon form, giving us the following formulas
-             * for a and b:
-             *
-             *   s = [ u1x (d0y + n0y - d1y - n1y)
-             *          + u1y (d1x + n1x - d0x - n0x) ]
-             *       / (u0x * u1y - u0y * u1x)
-             *
-             *   t = [ u0x (d0y + n0y - d1y - n1y)
-             *          + u0y (d1x + n1x - d0x - n0x) ]
-             *       / (u0x * u1y - u0y * u1x)
-             *
-             * And, since both d0 + n0 + s * u0 and d1 + n1 + t * u1 give
-             * us the same point, we only need to calculate one of the two.
-             *
-             * */
-
             int i0 = i;
             int i1 = (i + 1) % n;
-            VGEdge e0 = edges.get(i0);
-            VGEdge e1 = edges.get(i1);
 
-            Vector2 d0, d1; // Direction vectors
+            Vector2 sp0, sp1; // Starting points
             Vector2 n0, n1; // Normal vectors
-            Vector2 u0, u1; // Unit normal vectors
+            Vector2 d0, d1; // Direction vectors
 
-            float d0x, d0y, d1x, d1y; // Direction vector components
-            float n0x, n0y, n1x, n1y; // Normal vector components
-            float u0x, u0y, u1x, u1y; // Unit normal components
+            n0 = normals.get(i0);
+            n1 = normals.get(i1);
+            sp0 = n0.add(n0.nor().scl(value));
+            sp1 = n1.add(n1.nor().scl(value));
 
             d0 = directions.get(i0);
             d1 = directions.get(i1);
 
-            d0x = d0.x;
-            d0y = d0.y;
-            d1x = d1.x;
-            d1y = d1.y;
+            VectorFormLine l0 = new VectorFormLine(sp0, d0);
+            VectorFormLine l1 = new VectorFormLine(sp1, d1);
 
-            n0 = normals.get(i0);
-            n1 = normals.get(i1);
-
-            n0x = n0.x;
-            n0y = n0.y;
-            n1x = n1.x;
-            n1y = n1.y;
-
-            u0 = n0.nor();
-            u1 = n1.nor();
-
-            u0x = u0.x;
-            u0y = u0.y;
-            u1x = u1.x;
-            u1y = u1.y;
-
-            float s = ( u1x * (d0y + n0y - d1y - n1y)
-                    + u1y * (d1x + n1x - d0x - n0x))
-                    / (u0x * u1y - u0y * u1x);
-
-            // Calculate d0 + n0 + s * u0 as new vertex
-            Vector2 vertex = d0.add(n0).add(u0.scl(s));
-            vertices.set(i, new VGVertex(vertex));
+            try {
+                Vector2 vertex = l0.intersect(l1);;
+                vertices.set(i, new VGVertex(vertex));
+            } catch (VectorFormLine.ParallelLineException e) {
+                System.err.println("Parallel Line Exception occurred during " +
+                        "Obstacle Growth");
+            }
         }
 
         // Setup new edges
         for (int i = 0; i < n; i++) {
-
             VGEdge edge = new VGEdge(
                     vertices.get((i + 1) % n),
                     vertices.get(i),
