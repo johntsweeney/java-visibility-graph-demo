@@ -31,9 +31,28 @@ public class VGObstacle {
         VGVertex prevVertex = this.vertices.get(vertices.size() - 1);
         for (VGVertex curVertex : this.vertices) {
             edges.add(new VGEdge(prevVertex, curVertex, true));
+            prevVertex = curVertex;
         }
 
         grow(growthValue);
+    }
+
+    /**
+     * Get the edges of this obstacle.
+     *
+     * @return {@link ArrayList} of {@link VGEdge} objects
+     */
+    public ArrayList<VGEdge> getEdges() {
+        return edges;
+    }
+
+    /**
+     * Get the vertices of this obstacle.
+     *
+     * @return {@link ArrayList} of {@link VGVertex} objects
+     */
+    public ArrayList<VGVertex> getVertices() {
+        return vertices;
     }
 
     /**

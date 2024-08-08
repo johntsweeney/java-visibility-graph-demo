@@ -3,21 +3,29 @@ package com.mygdx.game;
 // GameScreen.java
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.visibilitygraph.VGEdge;
+import com.mygdx.game.visibilitygraph.VisibilityGraph;
 
 public class GameScreen implements Screen {
     private final MyGdxGame game;
     private Stage stage;
     private Skin skin;
     private ShapeRenderer shapeRenderer;
+    private VisibilityGraph visibilityGraph;
 
-    public GameScreen(MyGdxGame game) {
+    public GameScreen(MyGdxGame game, VisibilityGraph visibilityGraph) {
         this.game = game;
+        this.visibilityGraph = visibilityGraph;
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setAutoShapeType(true);
     }
 
     @Override
@@ -27,10 +35,10 @@ public class GameScreen implements Screen {
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        Label gameLabel = new Label("Game Screen", skin);
-        gameLabel.setPosition(Gdx.graphics.getWidth() / 2f - gameLabel.getWidth() / 2, Gdx.graphics.getHeight() / 2f);
+//        Label gameLabel = new Label("Game Screen", skin);
+//        gameLabel.setPosition(Gdx.graphics.getWidth() / 2f - gameLabel.getWidth() / 2, Gdx.graphics.getHeight() / 2f);
 
-        stage.addActor(gameLabel);
+//        stage.addActor(gameLabel);
     }
 
     @Override
@@ -41,7 +49,24 @@ public class GameScreen implements Screen {
 
         shapeRenderer.begin();
 
+        shapeRenderer.setColor(Color.BLUE);
+        Vector2 sp = visibilityGraph.getStartPoint();
+        shapeRenderer.circle(sp.x, sp.y, 5);
 
+        shapeRenderer.setColor(Color.GREEN);
+        Vector2 ep = visibilityGraph.getEndPoint();
+        shapeRenderer.circle(ep.x, ep.y, 5);
+
+        for (VGEdge edge : visibilityGraph.getEdgeList()) {
+            if (edge.isSolid) {
+                shapeRenderer.setColor(Color.RED);
+            } else {
+                shapeRenderer.setColor(Color.WHITE);
+            }
+
+            shapeRenderer.line(edge.a.position, edge.b.position);
+
+        }
 
         shapeRenderer.end();
 
