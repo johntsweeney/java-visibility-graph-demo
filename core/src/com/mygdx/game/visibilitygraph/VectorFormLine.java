@@ -46,7 +46,9 @@ public class VectorFormLine {
      * @return {@link Vector2} the point on the line given by b + tv
      */
     public Vector2 r(float t) {
-        return b.add(v.scl(t));
+        Vector2 b_dup = new Vector2(b);
+        Vector2 v_dup = new Vector2(v);
+        return b_dup.add(v_dup.scl(t));
     }
 
     /**

@@ -19,7 +19,7 @@ public class VGObstacle {
      *                 of the obstacle
      * @param growthValue amount by which to expand obstacle shape
      *                    (this is used to account for agents which have
-     *                    volume)
+     *                    area)
      */
     public VGObstacle(ArrayList<Vector2> vertices, float growthValue) {
         this.vertices = new ArrayList<>();
@@ -57,7 +57,7 @@ public class VGObstacle {
 
     /**
      * Grow obstacle by specified value. This is used when the visibility
-     * graph needs to account for an agent with non-negligible volume.
+     * graph needs to account for an agent with non-negligible area.
      *
      * @param value amount by which the object should grow
      */
@@ -67,19 +67,23 @@ public class VGObstacle {
         int n = edges.size();
 
         ArrayList<Vector2> normals = new ArrayList<>();
+        ArrayList<Vector2> unitNormals = new ArrayList<>();
         ArrayList<Vector2> directions = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            VGEdge e = edges.get(i);
-
+        for (VGEdge e : edges) {
             // Calculate a normal vector for edge e
             Vector2 normal = new Vector2();
-            normal.x = e.b.position.y - e.a.position.y;
-            normal.y = -(e.b.position.x - e.a.position.x);
+            Vector2 a = new Vector2(e.a.position);
+            Vector2 b = new Vector2(e.b.position);
+            normal.x = b.y - a.y;
+            normal.y = -(b.x - a.x);
+
+            Vector2 uNorm = new Vector2(normal);
+            unitNormals.add(uNorm.nor());
 
             // Calculate orthogonal projection of point vector u onto normal
             // vector (the resulting projection will be a normal vector
             // pointing to the line parallel to the edge)
-            Vector2 u = e.a.position; // starting point of edge
+            Vector2 u = new Vector2(a); // starting point of edge
             normal = normal.scl(
                     (u.dot(normal)) / (normal.dot(normal))
             );
@@ -87,7 +91,9 @@ public class VGObstacle {
             normals.add(normal);
 
             // Calculate direction vector of edge
-            Vector2 direction = e.b.position.sub(e.a.position);
+            Vector2 direction = b.sub(a);
+//            Vector2 direction = e.a.position.sub(e.b.position);
+
             directions.add(direction);
         }
 
@@ -109,21 +115,24 @@ public class VGObstacle {
 
             Vector2 sp0, sp1; // Starting points
             Vector2 n0, n1; // Normal vectors
+            Vector2 u0, u1; // Unit normals
             Vector2 d0, d1; // Direction vectors
 
-            n0 = normals.get(i0);
-            n1 = normals.get(i1);
-            sp0 = n0.add(n0.nor().scl(value));
-            sp1 = n1.add(n1.nor().scl(value));
+            n0 = new Vector2(normals.get(i0));
+            n1 = new Vector2(normals.get(i1));
+            u0 = new Vector2(unitNormals.get(i0));
+            u1 = new Vector2(unitNormals.get(i1));
+            sp0 = n0.add(u0.scl(value));
+            sp1 = n1.add(u1.scl(value));
 
-            d0 = directions.get(i0);
-            d1 = directions.get(i1);
+            d0 = new Vector2(directions.get(i0));
+            d1 = new Vector2(directions.get(i1));
 
             VectorFormLine l0 = new VectorFormLine(sp0, d0);
             VectorFormLine l1 = new VectorFormLine(sp1, d1);
 
             try {
-                Vector2 vertex = l0.intersect(l1);;
+                Vector2 vertex = l0.intersect(l1);
                 vertices.set(i, new VGVertex(vertex));
             } catch (VectorFormLine.ParallelLineException e) {
                 System.err.println("Parallel Line Exception occurred during " +

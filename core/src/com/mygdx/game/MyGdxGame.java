@@ -45,7 +45,7 @@ public class MyGdxGame extends Game {
 				startPoint,
 				endPoint,
 				obstacles,
-				0
+				5f
 		);
 
 		// Set the initial screen to the main menu
