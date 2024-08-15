@@ -18,4 +18,22 @@ public class VGVertex {
         position = pos;
     }
 
+    /**
+     * Get the angle of this vertex to the specified point from the X-axis.
+     * This is used for sorting vertices in the construction of a Visibility
+     * Graph.
+     *
+     * @param point the point from which to get the angle
+     *
+     * @return the angle (in degrees)
+     */
+    public float getAngleTo(Vector2 point) {
+        Vector2 vectorTo =  new Vector2(
+                position.x - point.x,
+                position.y - point.y
+        );
+
+        return vectorTo.angleDeg();
+    }
+
 }

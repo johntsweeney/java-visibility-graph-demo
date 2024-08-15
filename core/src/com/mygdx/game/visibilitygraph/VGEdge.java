@@ -1,5 +1,8 @@
 package com.mygdx.game.visibilitygraph;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector4;
+
 /**
  * Defines a Visibility Graph Edge.
  */
@@ -21,6 +24,106 @@ public class VGEdge {
         this.b = b;
         this.isSolid = isSolid;
         weight = a.position.dst(b.position);
+    }
+
+    /**
+     * Get whether this Edge intersects with the edge passed in.
+     *
+     * @return whether the edges intersect
+     */
+    public boolean intersects(VGEdge edge) {
+        VectorFormLine line1 = getLine();
+        VectorFormLine line2 = edge.getLine();
+
+        // Get edge boundary lists
+        Bounds b1 = getBoundaries();
+        Bounds b2 = edge.getBoundaries();
+
+        if (line1.isEquivalentTo(line2)) {
+            // Check to see if edge segments overlap
+            return (
+                b1.includes(edge.a.position)
+                || b1.includes(edge.b.position)
+                || b2.includes(a.position)
+                || b2.includes(b.position)
+            );
+        }
+
+        try {
+            // Get point of intersection
+            Vector2 poi = line1.intersect(line2);
+
+            // Check to see if intersection is within boundaries of each edge
+            return b1.includes(poi) && b2.includes(poi);
+
+        } catch (VectorFormLine.ParallelLineException e) {
+            // Lines are non-equivalent parallel. No intersection.
+            return false;
+        }
+    }
+
+    /**
+     * Private helper method to get the boundaries in the bounding box of
+     * this edge.
+     *
+     * @return {@link Vector4} containing {x=X_MIN, y=X_MAX, z=Y_MIN, w=Y_MAX}
+     */
+    private Bounds getBoundaries() {
+        return new Bounds(
+                Math.min(a.position.x, b.position.x),
+                Math.max(a.position.x, b.position.x),
+                Math.min(a.position.y, b.position.y),
+                Math.max(a.position.y, b.position.y)
+        );
+    }
+
+    /**
+     * Private helper method to get the line on which this edge exists.
+     *
+     * @return {@link VectorFormLine} the corresponding line
+     */
+    private VectorFormLine getLine() {
+        Vector2 startPoint = a.position;
+        Vector2 direction =
+                new Vector2(
+                        b.position.x - a.position.x,
+                        b.position.y - a.position.y
+                );
+
+        return new VectorFormLine(startPoint, direction);
+    }
+
+    /**
+     * Private helper inner class used to represent the boundaries of this edge.
+     */
+    private static class Bounds {
+
+        private final float xMin;
+        private final float xMax;
+        private final float yMin;
+        private final float yMax;
+
+        /**
+         * Construct a Bounds object.
+         *
+         * @param xMin minimum x value
+         * @param xMax maximum x value
+         * @param yMin minimum y value
+         * @param yMax maximum y value
+         */
+        public Bounds(float xMin, float xMax, float yMin, float yMax) {
+            this.xMin = xMin;
+            this.xMax = xMax;
+            this.yMin = yMin;
+            this.yMax = yMax;
+        }
+
+        public boolean includes(Vector2 point) {
+            return (
+                point.x >= xMin && point.x <= xMax    // Satisfies x bounds
+                && point.y >= yMin && point.y <= yMax // Satisfies y bounds
+            );
+        }
     }
 
 }

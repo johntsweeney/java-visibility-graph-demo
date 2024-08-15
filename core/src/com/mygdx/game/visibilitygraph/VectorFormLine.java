@@ -51,6 +51,57 @@ public class VectorFormLine {
         return b_dup.add(v_dup.scl(t));
     }
 
+
+    /**
+     * Get whether this line is parallel to the line passed in.
+     *
+     * @param line the line to check against
+     *
+     * @return whether the lines are parallel
+     */
+    public boolean isParallelTo(VectorFormLine line) {
+        return v.len() * line.v.len() == v.dot(line.v);
+    }
+
+    /**
+     * Get whether this line is equivalent to the line passed in.
+     *
+     * @param line line to be compared against
+     *
+     * @return whether the lines are equivalent
+     */
+    public boolean isEquivalentTo(VectorFormLine line) {
+        /*
+        * We can check whether two Vector Form Lines are equivalent by checking
+        * if the orthogonal projection of each start point onto the lines normal
+        * is the same AND the lines are parallel. If both are true, then the
+        * lines are equivalent. // TODO: Prove this statement!
+        * */
+
+        Vector2 u0 = new Vector2(b); // starting of this line
+        Vector2 d0 = getNormal();    // normal of this line
+
+        Vector2 u1 = new Vector2(line.b); // starting point of other line
+        Vector2 d1 = line.getNormal();    // normal of other line
+
+        // Get the orthogonal projections
+        d0.scl(u0.dot(d0) / d0.dot(d0));
+        d1.scl(u1.dot(d1) / d1.dot(d1));
+
+        // If the orthogonal projections are equivalent AND both lines are
+        // parallel, then the lines are equivalent
+        return (d0.epsilonEquals(d1) && isParallelTo(line));
+    }
+
+    /**
+     * Get this line's normal vector.
+     *
+     * @return {@link Vector2} the normal vector
+     */
+    public Vector2 getNormal() {
+        return new Vector2(v.y, -v.x);
+    }
+
     /**
      * Solve for the point at which this line intersects the line passed in.
      *
@@ -101,7 +152,7 @@ public class VectorFormLine {
 
         // If the product of the direction vectors magnitudes is the same as
         // their dot product then the corresponding lines are parallel
-        if (v.len() * line.v.len() == v.dot(line.v)) {
+        if (isParallelTo(line)) {
             throw new ParallelLineException(
                     "There are either none or infinitely many points of"
                             + " intersection for a pair of parallel lines."

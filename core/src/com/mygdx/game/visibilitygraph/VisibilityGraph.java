@@ -41,6 +41,7 @@ public class VisibilityGraph {
         vertexList = new ArrayList<>();
         this.obstacles = new HashSet<>();
 
+        // Setup Obstacles
         for (ArrayList<Vector2> vertices : obstacles) {
             VGObstacle obstacle = new VGObstacle(vertices, agentRadius);
             this.obstacles.add(obstacle);
@@ -49,7 +50,8 @@ public class VisibilityGraph {
             vertexList.addAll(obstacle.getVertices());
         }
 
-        // TODO: Construct visibility graph
+        // TODO: Construct visibility graph\
+        //
 
     }
 
