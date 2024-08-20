@@ -75,7 +75,7 @@ public class VectorFormLine {
         * We can check whether two Vector Form Lines are equivalent by checking
         * if the orthogonal projection of each start point onto the lines normal
         * is the same AND the lines are parallel. If both are true, then the
-        * lines are equivalent. // TODO: Prove this statement!
+        * lines are equivalent.
         * */
 
         Vector2 u0 = new Vector2(b); // starting of this line

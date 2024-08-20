@@ -8,11 +8,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.visibilitygraph.VGEdge;
 import com.mygdx.game.visibilitygraph.VisibilityGraph;
+
+import java.util.ArrayList;
 
 public class GameScreen implements Screen {
     private final MyGdxGame game;
@@ -57,15 +58,22 @@ public class GameScreen implements Screen {
         Vector2 ep = visibilityGraph.getEndPoint();
         shapeRenderer.circle(ep.x, ep.y, 5);
 
-        for (VGEdge edge : visibilityGraph.getEdgeList()) {
-            if (edge.isSolid) {
-                shapeRenderer.setColor(Color.RED);
-            } else {
-                shapeRenderer.setColor(Color.WHITE);
+        ArrayList<VGEdge> edges = new ArrayList<>();
+        edges.addAll(visibilityGraph.getObstacleEdges());
+        edges.addAll(visibilityGraph.getVisibilityEdges());
+
+        shapeRenderer.setColor(Color.WHITE);
+        for (VGEdge edge : edges) {
+            if (!edge.isSolid) {
+                shapeRenderer.line(edge.a.pos, edge.b.pos);
             }
+        }
 
-            shapeRenderer.line(edge.a.position, edge.b.position);
-
+        shapeRenderer.setColor(Color.RED);
+        for (VGEdge edge : edges) {
+            if (edge.isSolid) {
+                shapeRenderer.line(edge.a.pos, edge.b.pos);
+            }
         }
 
         shapeRenderer.end();

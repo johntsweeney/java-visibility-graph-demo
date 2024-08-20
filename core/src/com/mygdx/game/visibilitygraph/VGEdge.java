@@ -23,7 +23,21 @@ public class VGEdge {
         this.a = a;
         this.b = b;
         this.isSolid = isSolid;
-        weight = a.position.dst(b.position);
+        weight = a.pos.dst(b.pos);
+    }
+
+    /**
+     * Get whether this edge is incident to the edge passed in.
+     *
+     * @param edge the other edge to consider
+     *
+     * @return whether these edges are incident
+     */
+    public boolean incidentTo(VGEdge edge) {
+        return a.equals(edge.a)
+                || a.equals(edge.b)
+                || b.equals(edge.a)
+                || b.equals(edge.b);
     }
 
     /**
@@ -42,10 +56,10 @@ public class VGEdge {
         if (line1.isEquivalentTo(line2)) {
             // Check to see if edge segments overlap
             return (
-                b1.includes(edge.a.position)
-                || b1.includes(edge.b.position)
-                || b2.includes(a.position)
-                || b2.includes(b.position)
+                b1.includes(edge.a.pos)
+                || b1.includes(edge.b.pos)
+                || b2.includes(a.pos)
+                || b2.includes(b.pos)
             );
         }
 
@@ -70,10 +84,10 @@ public class VGEdge {
      */
     private Bounds getBoundaries() {
         return new Bounds(
-                Math.min(a.position.x, b.position.x),
-                Math.max(a.position.x, b.position.x),
-                Math.min(a.position.y, b.position.y),
-                Math.max(a.position.y, b.position.y)
+                Math.min(a.pos.x, b.pos.x),
+                Math.max(a.pos.x, b.pos.x),
+                Math.min(a.pos.y, b.pos.y),
+                Math.max(a.pos.y, b.pos.y)
         );
     }
 
@@ -83,11 +97,11 @@ public class VGEdge {
      * @return {@link VectorFormLine} the corresponding line
      */
     private VectorFormLine getLine() {
-        Vector2 startPoint = a.position;
+        Vector2 startPoint = a.pos;
         Vector2 direction =
                 new Vector2(
-                        b.position.x - a.position.x,
-                        b.position.y - a.position.y
+                        b.pos.x - a.pos.x,
+                        b.pos.y - a.pos.y
                 );
 
         return new VectorFormLine(startPoint, direction);
@@ -118,6 +132,13 @@ public class VGEdge {
             this.yMax = yMax;
         }
 
+        /**
+         * Get whether the point passed in can be found within these bounds.
+         *
+         * @param point the point to consider
+         *
+         * @return whether the point is present within these bounds.
+         */
         public boolean includes(Vector2 point) {
             return (
                 point.x >= xMin && point.x <= xMax    // Satisfies x bounds

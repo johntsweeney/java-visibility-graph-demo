@@ -7,15 +7,19 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class VGVertex {
 
-    public Vector2 position;
+    public Vector2 pos;
+    public VGEdge a, b; // Incident edges
+    public int groupID;
 
     /**
      * Construct a VGVertex.
      *
      * @param pos the positional info of this vertex
+     * @param groupID the group ID of this vertex
      */
-    public VGVertex(Vector2 pos) {
-        position = pos;
+    public VGVertex(Vector2 pos, int groupID) {
+        this.pos = pos;
+        this.groupID = groupID;
     }
 
     /**
@@ -29,8 +33,8 @@ public class VGVertex {
      */
     public float getAngleTo(Vector2 point) {
         Vector2 vectorTo =  new Vector2(
-                position.x - point.x,
-                position.y - point.y
+                pos.x - point.x,
+                pos.y - point.y
         );
 
         return vectorTo.angleDeg();

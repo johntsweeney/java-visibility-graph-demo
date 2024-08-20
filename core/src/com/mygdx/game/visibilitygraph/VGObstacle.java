@@ -9,8 +9,13 @@ import java.util.ArrayList;
  * from a set of these along with a start and end point.
  */
 public class VGObstacle {
-    ArrayList<VGVertex> vertices;
-    ArrayList<VGEdge> edges;
+
+
+    private static int numInstances = 0;
+
+    private int id;
+    private ArrayList<VGVertex> vertices;
+    private ArrayList<VGEdge> edges;
 
     /**
      * Construct a Visibility Graph Obstacle
@@ -22,15 +27,28 @@ public class VGObstacle {
      *                    area)
      */
     public VGObstacle(ArrayList<Vector2> vertices, float growthValue) {
+        numInstances++;
+        id = numInstances;
         this.vertices = new ArrayList<>();
-        for (Vector2 curVec : vertices) {
-            this.vertices.add(new VGVertex(curVec));
+        for (short i = 0; i < vertices.size(); i++) {
+            Vector2 curVec = vertices.get(i);
+            this.vertices.add(new VGVertex(curVec, id));
         }
 
         this.edges = new ArrayList<>();
         VGVertex prevVertex = this.vertices.get(vertices.size() - 1);
         for (VGVertex curVertex : this.vertices) {
-            edges.add(new VGEdge(prevVertex, curVertex, true));
+
+            // Create new edge
+            VGEdge newEdge = new VGEdge(prevVertex, curVertex, true);
+
+            // Add edge to incident vertices
+            prevVertex.b = newEdge;
+            curVertex.a = newEdge;
+
+            // Add edge to list of edges
+            edges.add(newEdge);
+
             prevVertex = curVertex;
         }
 
@@ -72,8 +90,8 @@ public class VGObstacle {
         for (VGEdge e : edges) {
             // Calculate a normal vector for edge e
             Vector2 normal = new Vector2();
-            Vector2 a = new Vector2(e.a.position);
-            Vector2 b = new Vector2(e.b.position);
+            Vector2 a = new Vector2(e.a.pos);
+            Vector2 b = new Vector2(e.b.pos);
             normal.x = b.y - a.y;
             normal.y = -(b.x - a.x);
 
@@ -133,7 +151,7 @@ public class VGObstacle {
 
             try {
                 Vector2 vertex = l0.intersect(l1);
-                vertices.set(i, new VGVertex(vertex));
+                vertices.set(i, new VGVertex(vertex, id));
             } catch (VectorFormLine.ParallelLineException e) {
                 System.err.println("Parallel Line Exception occurred during " +
                         "Obstacle Growth");
@@ -142,11 +160,19 @@ public class VGObstacle {
 
         // Setup new edges
         for (int i = 0; i < n; i++) {
+
+            VGVertex curVertex = vertices.get(i);
+            VGVertex nextVertex = vertices.get((i + 1) % n);
+
             VGEdge edge = new VGEdge(
-                    vertices.get((i + 1) % n),
-                    vertices.get(i),
+                    curVertex,
+                    nextVertex,
                     true
             );
+
+            curVertex.b = edge;
+            nextVertex.a = edge;
+
             edges.set(i, edge);
         }
 
