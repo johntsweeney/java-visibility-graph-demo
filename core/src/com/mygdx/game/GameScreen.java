@@ -31,10 +31,15 @@ public class GameScreen implements Screen {
     private SpriteBatch spriteBatch;
     private BitmapFont bitmapFont;
 
-    private Octagon octagon;
+    private ArrayList<Octagon> octagons;
+    private int activeOctagonID = 0;
+    private Octagon activeOctagon;
+
     private VisibilityGraph visibilityGraph;
 
     private ArrayList<Vector2> destinations;
+
+    private final boolean DEBUG_ENABLED = false;
 
     public GameScreen(MyGdxGame game) {
         this.game = game;
@@ -46,10 +51,21 @@ public class GameScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
         destinations = new ArrayList<>();
+        octagons = new ArrayList<>();
 
         Set<ArrayList<Vector2>> obstacles = new HashSet<>();
-        octagon = new Octagon(new Vector2(315, 235), 150);
-        obstacles.add(octagon.getVertices());
+        Octagon octagon1 = new Octagon(new Vector2(100, 300), 50);
+        octagons.add(octagon1);
+        Octagon octagon2 = new Octagon(new Vector2(200, 200), 50);
+        octagons.add(octagon2);
+        Octagon octagon3 = new Octagon(new Vector2(500, 100), 50);
+        octagons.add(octagon3);
+
+        obstacles.add(octagons.get(0).getVertices());
+        obstacles.add(octagons.get(1).getVertices());
+        obstacles.add(octagons.get(2).getVertices());
+
+        activeOctagon = octagons.get(activeOctagonID);
 
         Vector2 startPoint = new Vector2(10, 10);
         Vector2 endPoint = new Vector2(630, 470);
@@ -124,25 +140,26 @@ public class GameScreen implements Screen {
         shapeRenderer.end();
 
 
-        // DEBUG
-        spriteBatch.begin();
+        if (DEBUG_ENABLED) {        // DEBUG
+            spriteBatch.begin();
 
-        // Label Vertices
-        ArrayList<VGVertex> vertices = visibilityGraph.getVertices();
-        for (int i = 0; i < vertices.size(); i++) {
-            VGVertex vertex = vertices.get(i);
-            bitmapFont.setColor(Color.DARK_GRAY);
-            bitmapFont.draw(spriteBatch, Integer.toString(i), vertex.pos.x, vertex.pos.y);
+            // Label Vertices
+            ArrayList<VGVertex> vertices = visibilityGraph.getVertices();
+            for (int i = 0; i < vertices.size(); i++) {
+                VGVertex vertex = vertices.get(i);
+                bitmapFont.setColor(Color.DARK_GRAY);
+                bitmapFont.draw(spriteBatch, Integer.toString(i), vertex.pos.x, vertex.pos.y);
+            }
+
+            // Label Edges
+            for (VGEdge edge : edges) {
+                Vector2 midpoint = edge.getMidpoint();
+                bitmapFont.setColor(Color.PINK);
+                bitmapFont.draw(spriteBatch, Integer.toString(edge.ID), midpoint.x, midpoint.y);
+            }
+
+            spriteBatch.end();
         }
-
-        // Label Edges
-        for (VGEdge edge : edges) {
-            Vector2 midpoint = edge.getMidpoint();
-            bitmapFont.setColor(Color.PINK);
-            bitmapFont.draw(spriteBatch, Integer.toString(edge.ID), midpoint.x, midpoint.y);
-        }
-
-        spriteBatch.end();
 
     }
 
@@ -151,39 +168,47 @@ public class GameScreen implements Screen {
      */
     public void updateVisGraph() {
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            activeOctagonID = (activeOctagonID + 1) % octagons.size();
+            activeOctagon = octagons.get(activeOctagonID);
+        }
+
         boolean updated = false;
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            octagon.position.y = octagon.position.y + 2;
+            activeOctagon.position.y = activeOctagon.position.y + 1;
             updated = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            octagon.position.y = octagon.position.y - 2;
+            activeOctagon.position.y = activeOctagon.position.y - 1;
             updated = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            octagon.position.x = octagon.position.x - 2;
+            activeOctagon.position.x = activeOctagon.position.x - 1;
             updated = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            octagon.position.x = octagon.position.x + 2;
+            activeOctagon.position.x = activeOctagon.position.x + 1;
             updated = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-            octagon.radius = octagon.radius - 1;
-            if (octagon.radius < 10) octagon.radius = 10;
+            activeOctagon.radius = activeOctagon.radius - 1;
+            if (activeOctagon.radius < 10) activeOctagon.radius = 10;
             updated = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.X)) {
-            octagon.radius = octagon.radius + 1;
+            activeOctagon.radius = activeOctagon.radius + 1;
             updated = true;
         }
 
         if (updated) {
-            octagon.set();
+            activeOctagon.set();
 
             Set<ArrayList<Vector2>> obstacles = new HashSet<>();
-            obstacles.add(octagon.getVertices());
+
+            obstacles.add(octagons.get(0).getVertices());
+            obstacles.add(octagons.get(1).getVertices());
+            obstacles.add(octagons.get(2).getVertices());
 
             Vector2 startPoint = new Vector2(10, 10);
             Vector2 endPoint = new Vector2(630, 470);

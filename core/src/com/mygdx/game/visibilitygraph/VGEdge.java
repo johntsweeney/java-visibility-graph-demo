@@ -134,7 +134,7 @@ public class VGEdge {
      */
     private static class Bounds {
 
-        private static final float EPSILON = 0.00005f;
+        private static final float EPSILON = 0.0005f;
 
         private final float xMin;
         private final float xMax;
@@ -151,16 +151,11 @@ public class VGEdge {
          */
         public Bounds(float xMin, float xMax, float yMin, float yMax) {
 
-            // Add tolerance for zero width or height
-            if (xMin == xMax) {
-                xMin -= EPSILON;
-                xMax += EPSILON;
-            }
-
-            if (yMin == yMax) {
-                yMin -= EPSILON;
-                yMax += EPSILON;
-            }
+            // Add tolerance for floating point error
+            xMin -= EPSILON;
+            xMax += EPSILON;
+            yMin -= EPSILON;
+            yMax += EPSILON;
 
             this.xMin = xMin;
             this.xMax = xMax;
