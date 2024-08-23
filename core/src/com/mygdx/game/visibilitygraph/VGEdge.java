@@ -8,6 +8,10 @@ import com.badlogic.gdx.math.Vector4;
  */
 public class VGEdge {
 
+    // FIXME: DEBUG
+    private static int numInstances = 0;
+    public int ID;
+
     public VGVertex a, b;
     public boolean isSolid;
     public float weight;
@@ -24,6 +28,10 @@ public class VGEdge {
         this.b = b;
         this.isSolid = isSolid;
         weight = a.pos.dst(b.pos);
+
+        // FIXME: DEBUG
+        ID = numInstances;
+        numInstances++;
     }
 
     /**
@@ -108,9 +116,25 @@ public class VGEdge {
     }
 
     /**
+     * Get the midpoint of this edge.
+     *
+     * @return {@link Vector2} midpoint
+     */
+    public Vector2 getMidpoint() {
+        Vector2 p = new Vector2(a.pos);
+        Vector2 q = new Vector2(b.pos);
+
+        Vector2 r = q.sub(p).scl(0.5f);
+
+        return p.add(r);
+    }
+
+    /**
      * Private helper inner class used to represent the boundaries of this edge.
      */
     private static class Bounds {
+
+        private static final float EPSILON = 0.00005f;
 
         private final float xMin;
         private final float xMax;
@@ -126,6 +150,18 @@ public class VGEdge {
          * @param yMax maximum y value
          */
         public Bounds(float xMin, float xMax, float yMin, float yMax) {
+
+            // Add tolerance for zero width or height
+            if (xMin == xMax) {
+                xMin -= EPSILON;
+                xMax += EPSILON;
+            }
+
+            if (yMin == yMax) {
+                yMin -= EPSILON;
+                yMax += EPSILON;
+            }
+
             this.xMin = xMin;
             this.xMax = xMax;
             this.yMin = yMin;

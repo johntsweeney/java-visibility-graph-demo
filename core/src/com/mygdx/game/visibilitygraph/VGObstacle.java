@@ -30,9 +30,9 @@ public class VGObstacle {
         numInstances++;
         id = numInstances;
         this.vertices = new ArrayList<>();
-        for (short i = 0; i < vertices.size(); i++) {
-            Vector2 curVec = vertices.get(i);
-            this.vertices.add(new VGVertex(curVec, id));
+        for (Vector2 curVec : vertices) {
+            VGVertex vertex = new VGVertex(curVec, id);
+            this.vertices.add(vertex);
         }
 
         this.edges = new ArrayList<>();
@@ -43,8 +43,8 @@ public class VGObstacle {
             VGEdge newEdge = new VGEdge(prevVertex, curVertex, true);
 
             // Add edge to incident vertices
-            prevVertex.b = newEdge;
-            curVertex.a = newEdge;
+            prevVertex.addNeighbor(curVertex, newEdge);
+            curVertex.addNeighbor(prevVertex, newEdge);
 
             // Add edge to list of edges
             edges.add(newEdge);
@@ -53,6 +53,15 @@ public class VGObstacle {
         }
 
         grow(growthValue);
+    }
+
+    /**
+     * Get ID of this Obstacle.
+     *
+     * @return the ID of this obstacle
+     */
+    public int getId() {
+        return id;
     }
 
     /**
@@ -170,8 +179,8 @@ public class VGObstacle {
                     true
             );
 
-            curVertex.b = edge;
-            nextVertex.a = edge;
+            curVertex.addNeighbor(nextVertex, edge);
+            nextVertex.addNeighbor(curVertex, edge);
 
             edges.set(i, edge);
         }
