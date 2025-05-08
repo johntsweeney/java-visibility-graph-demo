@@ -32,6 +32,7 @@ tasks.register('debug', JavaExec) {
 }
 
 tasks.register('dist', Jar) {
+    archiveBaseName.set("vis-graph-demo")
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
         attributes 'Main-Class': project.mainClassName
