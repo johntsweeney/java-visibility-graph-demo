@@ -130,6 +130,12 @@ public class GameScreen implements Screen {
             }
         }
 
+        shapeRenderer.setColor(Color.YELLOW);
+        float x = activeOctagon.position.x;
+        float y = activeOctagon.position.y;
+        shapeRenderer.circle(x, y, (float) (activeOctagon.radius - 10.0));
+
+
         shapeRenderer.setColor(Color.GREEN);
         Vector2 prev = visibilityGraph.getStartPoint();
         for (Vector2 curr : destinations) {
